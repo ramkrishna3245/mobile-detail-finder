@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mobile Detail Finder</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Monetag TMA SDK (zone 11963075) -->
+<script src='//libtl.com/sdk.js' data-zone='11963075' data-sdk='show_11963075'></script>
 <style>
   :root{
     --bg: var(--tg-theme-bg-color, #ffffff);
@@ -86,11 +88,19 @@
     document.getElementById("shareBtn").style.display = "none";
   }
 
-  // Search 1 → Monetag offer link (naye tab me)
+  // Search 1 → Rewarded Popup ad first, then Monetag offer link (double earning, one click)
   function openOffer(){
-    if (tg?.openLink) tg.openLink(SMARTLINK_URL);
-    else window.open(SMARTLINK_URL, "_blank");
+    const go = () => { if (tg?.openLink) tg.openLink(SMARTLINK_URL); else window.open(SMARTLINK_URL, "_blank"); };
+    try {
+      if (typeof show_11963075 === "function") show_11963075("pop").then(go).catch(go);
+      else go();
+    } catch(e){ go(); }
   }
+
+  // In-App Interstitial: auto ads (max 2 per 6 min, 30s gap) — Monetag default settings
+  try {
+    if (typeof show_11963075 === "function") show_11963075({ type: "inApp", inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
+  } catch(e){}
 
   let lastNum = "";
   function lookup(){
