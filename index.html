@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -38,10 +38,10 @@
 </head>
 <body>
   <h1>📱 Mobile Detail Finder</h1>
-  <p class="sub">Operator + Circle pata karo (series based)</p>
+  <p class="sub">Find operator + circle (series based)</p>
 
   <input id="num" inputmode="numeric" maxlength="10" placeholder="10-digit number">
-  <button class="main" onclick="lookup()">Pata Karo</button>
+  <button class="main" onclick="lookup()">Look Up</button>
   <div id="error"></div>
 
   <div id="result">
@@ -51,21 +51,21 @@
     <div class="row"><span class="k">Series</span><span class="v" id="r-series"></span></div>
   </div>
 
-  <!-- ★ MONETAG: apna SmartLink URL yahan dalo ★ -->
+  <!-- ★ MONETAG: paste your SmartLink URL here ★ -->
   <div class="ad-slot" id="adSlot" style="display:none">
-    <a id="offerLink" href="#" target="_blank">⚡ Best Recharge Offers Dekho</a>
+    <a id="offerLink" href="#" target="_blank">⚡ View Best Recharge Offers</a>
   </div>
 
-  <button class="ghost" id="shareBtn" style="display:none" onclick="share()">↗ Telegram pe Share Karo</button>
+  <button class="ghost" id="shareBtn" style="display:none" onclick="share()">↗ Share on Telegram</button>
 
-  <p class="note">⚠️ Series se sirf <b>original</b> operator pata chalta hai.<br>MNP (port) ke baad operator badal sakta hai.<br>Naam/pata hum nahi batate — privacy first.</p>
+  <p class="note">⚠️ Series reveals only the <b>original</b> operator.<br>It may change after MNP (porting).<br>We never show names/addresses — privacy first.</p>
 
   <h2>Recent checks</h2>
   <div id="history"></div>
 
 <script src="series.js"></script>
 <script>
-  // ★ MONETAG: apna SmartLink yahan paste karo (publishers.monetag.com se milega)
+  // ★ MONETAG: paste your SmartLink here (you'll get it from publishers.monetag.com)
   const SMARTLINK_URL = ""; // e.g. "https://otieu.com/4/xxxxxxx"
 
   const tg = window.Telegram?.WebApp;
@@ -75,8 +75,8 @@
     document.getElementById("offerLink").href = SMARTLINK_URL;
     document.getElementById("adSlot").style.display = "block";
   }
-  // MultiTag (Popunder/IPP/Vignette/Push) chahiye to Monetag dashboard se tag
-  // copy karke yahan <head> me paste karna — guide: help.monetag.com collection 11021564
+  // MultiTag (Popunder/IPP/Vignette/Push): copy the tag from your Monetag
+  // dashboard and paste it into <head> — guide: help.monetag.com collection 11021564
 
   function showError(msg){
     const e = document.getElementById("error");
@@ -89,10 +89,10 @@
   function lookup(){
     const num = document.getElementById("num").value.replace(/\D/g,"");
     document.getElementById("error").style.display = "none";
-    if (!/^[6-9]\d{9}$/.test(num)) return showError("Sahi 10-digit Indian mobile number dalo (6-9 se shuru).");
+    if (!/^[6-9]\d{9}$/.test(num)) return showError("Enter a valid 10-digit Indian mobile number (starting 6-9).");
     const series = num.slice(0,4);
     const info = MOBILE_SERIES[series];
-    if (!info) return showError("Ye series humare sample data me nahi hai. Full data jald aa raha hai.");
+    if (!info) return showError("This series is not in our sample data yet. Full database coming soon.");
     lastNum = num;
     document.getElementById("r-num").textContent = "+91 " + num;
     document.getElementById("r-op").textContent = info.op + " *";
@@ -118,10 +118,10 @@
     try{ h = JSON.parse(localStorage.getItem("mdf_hist") || "[]"); }catch(e){}
     box.innerHTML = h.length
       ? h.map(x => `<div class="item"><span><b>+91 ${x.n}</b></span><span>${x.op} · ${x.c}</span></div>`).join("")
-      : `<p class="note">Abhi koi check nahi kiya.</p>`;
+      : `<p class="note">No checks yet.</p>`;
   }
   function share(){
-    const text = `Maine apne number ki details nikali: ${document.getElementById("r-op").textContent} ${document.getElementById("r-circle").textContent} — tum bhi check karo!`;
+    const text = `I just checked my number's details: ${document.getElementById("r-op").textContent} ${document.getElementById("r-circle").textContent} — check yours too!`;
     const url = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
     if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
   }
