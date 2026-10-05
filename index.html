@@ -99,15 +99,11 @@
     } catch(e){ go(); }
   }
 
-  // In-App Interstitial: sirf pehli successful lookup ke BAAD (app turant khulega)
-  let adShownThisSession = false;
-  function showInAppAd(){
-    if (adShownThisSession) return;
-    adShownThisSession = true;
-    try {
-      if (typeof show_11963075 === "function") show_11963075({ type: "inApp", inAppSettings: { frequency: 1, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
-    } catch(e){}
-  }
+  // In-App Interstitial: app khulte hi auto (earning first) — SDK async hai isliye page block nahi hoga
+  try {
+    if (typeof show_11963075 === "function") show_11963075({ type: "inApp", inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
+    else window.addEventListener("load", () => { try { show_11963075({ type: "inApp", inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } }); } catch(e){} });
+  } catch(e){}
 
   let lastNum = "";
   function lookup(){
@@ -125,7 +121,6 @@
     document.getElementById("result").classList.add("show");
     document.getElementById("shareBtn").style.display = "block";
     saveHistory(num, info);
-    showInAppAd(); // result milne ke baad 1 ad — pehle value, phir earning
     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
   }
 
