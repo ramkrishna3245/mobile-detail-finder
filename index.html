@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mobile Detail Finder</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg: var(--tg-theme-bg-color, #ffffff);
+    --text: var(--tg-theme-text-color, #111111);
+    --hint: var(--tg-theme-hint-color, #777777);
+    --btn: var(--tg-theme-button-color, #2481cc);
+    --btn-text: var(--tg-theme-button-text-color, #ffffff);
+    --card: var(--tg-theme-secondary-bg-color, #f2f2f2);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);padding:16px;max-width:480px;margin:0 auto}
+  h1{font-size:20px;text-align:center;margin:8px 0 4px}
+  p.sub{text-align:center;color:var(--hint);font-size:13px;margin-bottom:16px}
+  input{width:100%;font-size:22px;letter-spacing:3px;text-align:center;padding:14px;border:2px solid var(--btn);border-radius:12px;background:var(--bg);color:var(--text);outline:none}
+  button.main{width:100%;margin-top:12px;padding:14px;font-size:17px;font-weight:700;border:none;border-radius:12px;background:var(--btn);color:var(--btn-text);cursor:pointer}
+  button.ghost{width:100%;margin-top:8px;padding:10px;font-size:14px;border:1px solid var(--hint);border-radius:12px;background:transparent;color:var(--text);cursor:pointer}
+  #result{margin-top:16px;background:var(--card);border-radius:12px;padding:16px;display:none}
+  #result.show{display:block}
+  #result .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(128,128,128,.25);font-size:15px}
+  #result .row:last-child{border:none}
+  #result .k{color:var(--hint)}
+  #result .v{font-weight:700;text-align:right}
+  #error{color:#e5484d;text-align:center;margin-top:10px;font-size:14px;display:none}
+  .note{margin-top:14px;font-size:12px;color:var(--hint);text-align:center}
+  h2{font-size:15px;margin:18px 0 8px;color:var(--hint)}
+  #history .item{background:var(--card);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:14px;display:flex;justify-content:space-between}
+  /* === MONETAG AD SLOT (apna SmartLink lagao) === */
+  .ad-slot{margin-top:16px;text-align:center}
+  .ad-slot a{display:inline-block;padding:12px 20px;border-radius:12px;background:var(--btn);color:var(--btn-text);text-decoration:none;font-weight:700}
+</style>
+</head>
+<body>
+  <h1>📱 Mobile Detail Finder</h1>
+  <p class="sub">Operator + Circle pata karo (series based)</p>
+
+  <input id="num" inputmode="numeric" maxlength="10" placeholder="10-digit number">
+  <button class="main" onclick="lookup()">Pata Karo</button>
+  <div id="error"></div>
+
+  <div id="result">
+    <div class="row"><span class="k">Number</span><span class="v" id="r-num"></span></div>
+    <div class="row"><span class="k">Operator (original)</span><span class="v" id="r-op"></span></div>
+    <div class="row"><span class="k">Circle / State</span><span class="v" id="r-circle"></span></div>
+    <div class="row"><span class="k">Series</span><span class="v" id="r-series"></span></div>
+  </div>
+
+  <!-- ★ MONETAG: apna SmartLink URL yahan dalo ★ -->
+  <div class="ad-slot" id="adSlot" style="display:none">
+    <a id="offerLink" href="#" target="_blank">⚡ Best Recharge Offers Dekho</a>
+  </div>
+
+  <button class="ghost" id="shareBtn" style="display:none" onclick="share()">↗ Telegram pe Share Karo</button>
+
+  <p class="note">⚠️ Series se sirf <b>original</b> operator pata chalta hai.<br>MNP (port) ke baad operator badal sakta hai.<br>Naam/pata hum nahi batate — privacy first.</p>
+
+  <h2>Recent checks</h2>
+  <div id="history"></div>
+
+<script src="series.js"></script>
+<script>
+  // ★ MONETAG: apna SmartLink yahan paste karo (publishers.monetag.com se milega)
+  const SMARTLINK_URL = ""; // e.g. "https://otieu.com/4/xxxxxxx"
+
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  if (SMARTLINK_URL) {
+    document.getElementById("offerLink").href = SMARTLINK_URL;
+    document.getElementById("adSlot").style.display = "block";
+  }
+  // MultiTag (Popunder/IPP/Vignette/Push) chahiye to Monetag dashboard se tag
+  // copy karke yahan <head> me paste karna — guide: help.monetag.com collection 11021564
+
+  function showError(msg){
+    const e = document.getElementById("error");
+    e.textContent = msg; e.style.display = "block";
+    document.getElementById("result").classList.remove("show");
+    document.getElementById("shareBtn").style.display = "none";
+  }
+
+  let lastNum = "";
+  function lookup(){
+    const num = document.getElementById("num").value.replace(/\D/g,"");
+    document.getElementById("error").style.display = "none";
+    if (!/^[6-9]\d{9}$/.test(num)) return showError("Sahi 10-digit Indian mobile number dalo (6-9 se shuru).");
+    const series = num.slice(0,4);
+    const info = MOBILE_SERIES[series];
+    if (!info) return showError("Ye series humare sample data me nahi hai. Full data jald aa raha hai.");
+    lastNum = num;
+    document.getElementById("r-num").textContent = "+91 " + num;
+    document.getElementById("r-op").textContent = info.op + " *";
+    document.getElementById("r-circle").textContent = info.circle;
+    document.getElementById("r-series").textContent = series + "xxxxx";
+    document.getElementById("result").classList.add("show");
+    document.getElementById("shareBtn").style.display = "block";
+    saveHistory(num, info);
+    if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+  }
+
+  function saveHistory(num, info){
+    try{
+      const h = JSON.parse(localStorage.getItem("mdf_hist") || "[]");
+      h.unshift({n:num, op:info.op, c:info.circle, t:Date.now()});
+      localStorage.setItem("mdf_hist", JSON.stringify(h.slice(0,10)));
+      renderHistory();
+    }catch(e){}
+  }
+  function renderHistory(){
+    const box = document.getElementById("history");
+    let h = [];
+    try{ h = JSON.parse(localStorage.getItem("mdf_hist") || "[]"); }catch(e){}
+    box.innerHTML = h.length
+      ? h.map(x => `<div class="item"><span><b>+91 ${x.n}</b></span><span>${x.op} · ${x.c}</span></div>`).join("")
+      : `<p class="note">Abhi koi check nahi kiya.</p>`;
+  }
+  function share(){
+    const text = `Maine apne number ki details nikali: ${document.getElementById("r-op").textContent} ${document.getElementById("r-circle").textContent} — tum bhi check karo!`;
+    const url = "https://t.me/share/url?url=&text=" + encodeURIComponent(text);
+    if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
+  }
+  document.getElementById("num").addEventListener("keydown", e => { if (e.key === "Enter") lookup(); });
+  renderHistory();
+</script>
+</body>
+</html>
