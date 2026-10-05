@@ -41,7 +41,8 @@
   <p class="sub">Find operator + circle (series based)</p>
 
   <input id="num" inputmode="numeric" maxlength="10" placeholder="10-digit number">
-  <button class="main" onclick="lookup()">Look Up</button>
+  <button class="main" onclick="openOffer()">Search 1</button>
+  <button class="main" style="background:#2ea043" onclick="lookup()">Search 2</button>
   <div id="error"></div>
 
   <div id="result">
@@ -65,8 +66,8 @@
 
 <script src="series.js"></script>
 <script>
-  // ★ MONETAG: paste your SmartLink here (you'll get it from publishers.monetag.com)
-  const SMARTLINK_URL = ""; // e.g. "https://otieu.com/4/xxxxxxx"
+  // ★ MONETAG SmartLink (Search 1 button ye link kholta hai)
+  const SMARTLINK_URL = "https://omg10.com/4/11040910";
 
   const tg = window.Telegram?.WebApp;
   if (tg) { tg.ready(); tg.expand(); }
@@ -83,6 +84,12 @@
     e.textContent = msg; e.style.display = "block";
     document.getElementById("result").classList.remove("show");
     document.getElementById("shareBtn").style.display = "none";
+  }
+
+  // Search 1 → Monetag offer link (naye tab me)
+  function openOffer(){
+    if (tg?.openLink) tg.openLink(SMARTLINK_URL);
+    else window.open(SMARTLINK_URL, "_blank");
   }
 
   let lastNum = "";
