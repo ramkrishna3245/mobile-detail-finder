@@ -5,8 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mobile Detail Finder</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- Monetag TMA SDK (zone 11963075) -->
-<script src='//libtl.com/sdk.js' data-zone='11963075' data-sdk='show_11963075'></script>
+<link rel="preconnect" href="https://libtl.com">
+<link rel="dns-prefetch" href="https://libtl.com">
+<!-- Monetag TMA SDK (zone 11963075) — async taaki page pehle khule, ad baad me -->
+<script async src='//libtl.com/sdk.js' data-zone='11963075' data-sdk='show_11963075'></script>
 <style>
   :root{
     --bg: var(--tg-theme-bg-color, #ffffff);
@@ -97,10 +99,15 @@
     } catch(e){ go(); }
   }
 
-  // In-App Interstitial: auto ads (max 2 per 6 min, 30s gap) — Monetag default settings
-  try {
-    if (typeof show_11963075 === "function") show_11963075({ type: "inApp", inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
-  } catch(e){}
+  // In-App Interstitial: sirf pehli successful lookup ke BAAD (app turant khulega)
+  let adShownThisSession = false;
+  function showInAppAd(){
+    if (adShownThisSession) return;
+    adShownThisSession = true;
+    try {
+      if (typeof show_11963075 === "function") show_11963075({ type: "inApp", inAppSettings: { frequency: 1, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
+    } catch(e){}
+  }
 
   let lastNum = "";
   function lookup(){
@@ -118,6 +125,7 @@
     document.getElementById("result").classList.add("show");
     document.getElementById("shareBtn").style.display = "block";
     saveHistory(num, info);
+    showInAppAd(); // result milne ke baad 1 ad — pehle value, phir earning
     if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
   }
 
